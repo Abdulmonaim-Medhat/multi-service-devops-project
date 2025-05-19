@@ -1,0 +1,12 @@
+version: "3.8"
+services:
+  service_a:
+    build: ./service_a
+    ports:
+      - "5000:5000"
+  service_b:
+    build: ./service_b
+    ports:
+      - "6000:6000"
+    depends_on:
+      - service_a
