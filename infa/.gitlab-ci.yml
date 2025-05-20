@@ -1,0 +1,26 @@
+stages:
+  - build
+  - test
+  - deploy
+
+build:
+  stage: build
+  script:
+    - docker build -t service_a ./service_a
+    - docker build -t service_b ./service_b
+
+test:
+  stage: test
+  script:
+    - cd service_a && python -m pytest
+    - cd service_b && python -m pytest
+
+deploy:
+  stage: deploy
+  script:
+    - echo "Deploying Service A to $SERVICE_A_IP..."
+    - scp -o StrictHostKeyChecking=no -r ./service_a ubuntu@$SERVICE_A_IP:~/service_a
+    - ssh -o StrictHostKeyChecking=no ubuntu@$SERVICE_A_IP "cd service_a && docker-compose up -d --build"
+    - echo "Deploying Service B to $SERVICE_B_IP..."
+    - scp -r ./service_b ubuntu@$SERVICE_B_IP:~/service_b
+    - ssh ubuntu@$SERVICE_B_IP "cd service_b && docker-compose up -d --build"
